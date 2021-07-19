@@ -25,7 +25,6 @@ class Logger {
   void WARN(T t) {
     if (verbosity < LogLevel::WARN) return;
     print_object(t, LogLevel::WARN);
-    exit(1);
   }
   /**
    * @brief Prints objects, separated by spaces, at the log level WARN and then
@@ -40,7 +39,6 @@ class Logger {
   void WARN(std::string message, Field<Args>... args) {
     if (verbosity < LogLevel::WARN) return;
     print_message(message, LogLevel::WARN, args...);
-    exit(1);
   }
   /**
    * @brief Prints an object with the log level FATAL and then exits with an
