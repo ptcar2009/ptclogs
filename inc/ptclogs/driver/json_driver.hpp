@@ -1,12 +1,15 @@
 #ifndef LOGS_JSON_DRIVER_H
 #define LOGS_JSON_DRIVER_H
 
-#include "ptclogs/driver/idriver.h"
+#include "ptclogs/driver/idriver.hpp"
 
 namespace logger{
+/**
+ * @brief Driver that prints logs formatted as json objects. Strings get quoted, other objects get printed as they are.
+ */
 class JSONDriver : IDriver {
  public:
-  JSONDriver(std::ostream& out, LogLevel& level) : IDriver(out, level){};
+  JSONDriver(std::ostream& out) : IDriver(out) {};
   void begin_message();
   void end_message();
   template <typename T>
@@ -64,7 +67,7 @@ void logger::JSONDriver::print_object(char* object) {
 }
 template <typename T>
 void logger::JSONDriver::print_field(std::string header, T value) {
-  out << quote(header) << ":" << value;
+    out << quote(header) << ":" << value;
 }
 template <typename T>
 void logger::JSONDriver::print_object(T object) {

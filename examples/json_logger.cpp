@@ -1,6 +1,5 @@
-#include <ptclogs/driver/json_driver.h>
-#include <ptclogs/logs.h>
-
+#include <ptclogs/driver/json_driver.hpp>
+#include <ptclogs/logs.hpp>
 #include <string>
 
 using namespace logger;

@@ -19,7 +19,7 @@ LFLAGS=
 SFLAGS= -fPIC
 SOFLAGS=-I$(IDIR) -Wl,-soname,$(SO_NAME)
 
-_DEPS = ptclogs/driver/idriver.h ptclogs/driver/console_driver.h ptclogs/driver/json_driver.h ptclogs/logs.h
+_DEPS = ptclogs/driver/idriver.hpp ptclogs/driver/console_driver.hpp ptclogs/driver/json_driver.hpp ptclogs/logs.hpp
 DEPS = $(patsubst %,$(IDIR)/%,$(_DEPS))
 
 _OBJ = driver.o console_driver.o json_driver.o

@@ -5,7 +5,7 @@
 #include <ostream>
 #include <string>
 
-#include "ptclogs/driver/idriver.h"
+#include "ptclogs/driver/idriver.hpp"
 
 namespace logger {
 /**
@@ -162,7 +162,7 @@ class Logger {
    *
    * @param out Output stream for the logger.
    */
-  Logger(std::ostream& out = std::cout) : out(out), driver(out, log_level) {
+  Logger(std::ostream& out = std::cout) : out(out), driver(out) {
     log_level = LogLevel::INFO;
     if (getenv("VERBOSITY") != NULL)
       log_level = LogLevel(atoi(getenv("VERBOSITY")));
@@ -175,7 +175,7 @@ class Logger {
    * @param out Output stream on which the logger will write to.
    */
   Logger(LogLevel log_level, std::ostream& out = std::cout)
-      : log_level(log_level), driver(out, log_level), out(out){};
+      : log_level(log_level), driver(out), out(out){};
 
  private:
   Driver driver;

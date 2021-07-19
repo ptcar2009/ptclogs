@@ -1,10 +1,13 @@
 #ifndef LOGS_CONSOLE_DRIVER_H
 #define LOGS_CONSOLE_DRIVER_H
-#include "ptclogs/driver/idriver.h"
+#include "ptclogs/driver/idriver.hpp"
 namespace logger{
+/**
+ * @brief Prints logs to the console formatted in a human readable way. Log levels are colored.
+ */
 class ConsoleDriver : IDriver {
  public:
-  ConsoleDriver(std::ostream& out, LogLevel& level) : IDriver(out, level){};
+  ConsoleDriver(std::ostream& out) : IDriver(out){};
   void begin_message();
   void end_message();
   template <typename T>

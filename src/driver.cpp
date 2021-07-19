@@ -1,7 +1,11 @@
 #include <chrono>
 
-#include "ptclogs/driver/idriver.h"
+#include "ptclogs/driver/idriver.hpp"
 
+/**
+ * @brief Returns the formatted timestamp as a string.
+ *
+ */
 std::string logger::IDriver::timestamp() {
     time_t now;
     time(&now);
