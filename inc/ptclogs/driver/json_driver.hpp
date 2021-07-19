@@ -14,12 +14,10 @@ class JSONDriver : IDriver {
   void end_message();
   template <typename T>
   void print_field(std::string header, T value);
-  template <typename T>
   void print_field(std::string header, std::string value);
-  template <typename T>
   void print_field(std::string header, char* value);
-  template <typename T>
   void print_field(std::string header, const char* value);
+
   void print_message(std::string message);
   void print_timestamp();
   void print_level(LogLevel level);
@@ -27,11 +25,8 @@ class JSONDriver : IDriver {
   void field_separator();
   template <typename T>
   void print_object(T object);
-  template <typename T>
   void print_object(std::string object); 
-  template <typename T>
   void print_object(char const* object); 
-  template <typename T>
   void print_object(char* object); 
 
  private:
@@ -39,32 +34,6 @@ class JSONDriver : IDriver {
 };
 };  // namespace logger
 
-template <>
-void logger::JSONDriver::print_field(std::string header, std::string value) {
-    out << quote(header) << ":" << quote(value);
-}
-
-template <>
-void logger::JSONDriver::print_field(std::string header, char* value) {
-    out << quote(header) << ":" << quote(value);
-}
-template <>
-void logger::JSONDriver::print_field(std::string header, const char* value) {
-    out << quote(header) << ":" << quote(value);
-}
-
-template <>
-void logger::JSONDriver::print_object(std::string object) {
-    out << quote(messageKey) << ":" << quote(object);
-}
-template <>
-void logger::JSONDriver::print_object(char const* object) {
-    out << quote(messageKey) << ":" << quote(object);
-}
-template <>
-void logger::JSONDriver::print_object(char* object) {
-    out << quote(messageKey) << ":" << quote(object);
-}
 template <typename T>
 void logger::JSONDriver::print_field(std::string header, T value) {
     out << quote(header) << ":" << value;

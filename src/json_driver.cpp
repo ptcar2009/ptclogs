@@ -2,6 +2,26 @@
 
 #include <string>
 
+void logger::JSONDriver::print_field(std::string header, std::string value) {
+    out << quote(header) << ":" << quote(value);
+}
+
+void logger::JSONDriver::print_field(std::string header, char* value) {
+    out << quote(header) << ":" << quote(value);
+}
+void logger::JSONDriver::print_field(std::string header, const char* value) {
+    out << quote(header) << ":" << quote(value);
+}
+
+void logger::JSONDriver::print_object(std::string object) {
+    out << quote(messageKey) << ":" << quote(object);
+}
+void logger::JSONDriver::print_object(char const* object) {
+    out << quote(messageKey) << ":" << quote(object);
+}
+void logger::JSONDriver::print_object(char* object) {
+    out << quote(messageKey) << ":" << quote(object);
+}
 void logger::JSONDriver::begin_message() { out << "{"; }
 void logger::JSONDriver::end_message() { out << "}"; }
 
