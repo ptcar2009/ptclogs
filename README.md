@@ -29,8 +29,8 @@ If set by instantiation, it's a parameter in the `Logger` class.
 Console logger is for easily readable console logs with configurable log level sensitivity.
 ### Example
 ```cpp
-#include <ptclogs/driver/console_driver.h>
-#include <ptclogs/logs.h>
+#include <ptclogs/driver/console_driver.hpp>
+#include <ptclogs/logs.hpp>
 
 #include <string>
 
@@ -57,8 +57,8 @@ JSON logger encodes all information in machine readable JSON formatted objects.
 ### Example
 
 ```cpp
-#include <ptclogs/driver/json_driver.h>
-#include <ptclogs/logs.h>
+#include <ptclogs/driver/json_driver.hpp>
+#include <ptclogs/logs.hpp>
 
 #include <string>
 
