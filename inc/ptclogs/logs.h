@@ -14,8 +14,36 @@ namespace logger {
 template <class Driver>
 class Logger {
  public:
+  
   /**
-   * @brief Prints an object with the log level ERROR and then exits with an
+   * @brief Prints an object with the log level WARN.
+   *
+   * @tparam T Type of the object that will be printed.
+   * @param t Object that will be printed.
+   */
+  template <typename T>
+  void WARN(T t) {
+    if (verbosity < LogLevel::WARN) return;
+    print_object(t, LogLevel::WARN);
+    exit(1);
+  }
+  /**
+   * @brief Prints objects, separated by spaces, at the log level WARN and then
+   * exits with an error.
+   *
+   * @tparam T Type of the first object to be printed.
+   * @tparam Args Type of the other objecs.
+   * @param t First object to be printed.
+   * @param args Other objects to be printed.
+   */
+  template <typename... Args>
+  void WARN(std::string message, Field<Args>... args) {
+    if (verbosity < LogLevel::WARN) return;
+    print_message(message, LogLevel::WARN, args...);
+    exit(1);
+  }
+  /**
+   * @brief Prints an object with the log level FATAL and then exits with an
    * error.
    *
    * @tparam T Type of the object that will be printed.
@@ -28,7 +56,7 @@ class Logger {
     exit(1);
   }
   /**
-   * @brief Prints objects, separated by spaces, at the log level ERROR and then
+   * @brief Prints objects, separated by spaces, at the log level FATAL and then
    * exits with an error.
    *
    * @tparam T Type of the first object to be printed.
@@ -142,7 +170,8 @@ class Logger {
    * representing ERROR, INFO and DEBUG, respectively.
    *
    */
-  Logger(std::ostream& out = std::cout)cerr : out(out), driver(out, verbosity) {
+  Logger(std::ostream& out = std::cout) : out(out),
+                                               driver(out, verbosity) {
     verbosity = LogLevel::INFO;
     if (getenv("VERBOSITY") != NULL)
       verbosity = LogLevel(atoi(getenv("VERBOSITY")));
