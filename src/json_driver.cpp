@@ -1,5 +1,7 @@
 #include "ptclogs/driver/json_driver.h"
 
+#include <string>
+
 void logger::JSONDriver::begin_message() { out << "{"; }
 void logger::JSONDriver::end_message() { out << "}"; }
 
@@ -32,20 +34,6 @@ void logger::JSONDriver::print_level(logger::LogLevel log_level) {
 	    out << quote(levelKey) << ":" << quote("FATAL");
 	    break;
     }
-}
-
-template <>
-void logger::JSONDriver::print_field(std::string header, std::string value) {
-    out << quote(header) << ":" << quote(value);
-}
-
-template <>
-void logger::JSONDriver::print_field(std::string header, char* value) {
-    out << quote(header) << ":" << quote(value);
-}
-template <>
-void logger::JSONDriver::print_field(std::string header, const char* value) {
-    out << quote(header) << ":" << quote(value);
 }
 
 std::string logger::JSONDriver::quote(std::string str) {

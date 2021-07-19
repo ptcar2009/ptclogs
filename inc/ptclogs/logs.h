@@ -142,7 +142,7 @@ class Logger {
    * representing ERROR, INFO and DEBUG, respectively.
    *
    */
-  Logger(std::ostream& out = std::cerr) : out(out), driver(out, verbosity) {
+  Logger(std::ostream& out = std::cout)cerr : out(out), driver(out, verbosity) {
     verbosity = LogLevel::INFO;
     if (getenv("VERBOSITY") != NULL)
       verbosity = LogLevel(atoi(getenv("VERBOSITY")));
@@ -154,7 +154,7 @@ class Logger {
    * @param verbosity Log level of the logger.
    * @param out Output stream on which the logger will write to.
    */
-  Logger(LogLevel verbosity, std::ostream& out = std::cerr)
+  Logger(LogLevel verbosity, std::ostream& out = std::cout)
       : verbosity(verbosity), driver(out, verbosity), out(out){};
 
  private:
