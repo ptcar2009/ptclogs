@@ -14,7 +14,7 @@ namespace logger {
 /**
  * @brief Customizeable logger with templated prints.
  */
-template <class Driver>
+template <class Driver = ConsoleDriver, std::ostream& out = std::cout>
 class Logger {
  public:
   /**
@@ -160,8 +160,8 @@ class Logger {
   LogLevel GetLogLevel() { return log_level; };
 
   template <typename... ExtraArgs>
-  Logger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out), extraFunctions() {
+  Logger( Field<ExtraArgs>... extra)
+      : driver(out), extraFunctions() {
     log_level = LogLevel::INFO;
     if (getenv("VERBOSITY") != NULL)
       log_level = LogLevel(atoi(getenv("VERBOSITY")));
@@ -171,24 +171,24 @@ class Logger {
   }
 
   template <typename... ExtraArgs>
-  Logger(LogLevel log_level, std::ostream& out = std::cout,
+  Logger(LogLevel log_level,
          Field<ExtraArgs>... extra)
-      : log_level(log_level), out(out), driver(out) {
+      : log_level(log_level), driver(out) {
     extraArgs = [this, extra...]() { printv(extra...); };
     extraFunctions.push_back(extraArgs);
   }
 
   template <typename... ExtraArgs>
-  Logger<Driver> With(Field<ExtraArgs>... extra) {
-    return Logger<Driver>(log_level, out, extraFunctions, extra...);
+  Logger<Driver, out> With(Field<ExtraArgs>... extra) {
+    return Logger<Driver, out>(log_level,  extraFunctions, extra...);
   }
 
  private:
   template <typename... ExtraArgs>
-  Logger(LogLevel log_level, std::ostream& out,
+  Logger(LogLevel log_level,
          std::vector<std::function<void()>> _extraFunctions,
          Field<ExtraArgs>... extra)
-      : Logger(log_level, out, extra...) {
+      : Logger(log_level,  extra...) {
     for (auto f : _extraFunctions) {
       extraFunctions.push_back(f);
     }
@@ -247,7 +247,6 @@ class Logger {
     out << std::endl;
   }
 
-  std::ostream& out;
 
   std::function<void()> extraArgs;
 };

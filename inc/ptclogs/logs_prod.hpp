@@ -1,106 +1,28 @@
 #ifndef PTCLOGS_PRODUCTION_HPP
 #define PTCLOGS_PRODUCTION_HPP
-#include "ptclogs/driver/idriver.hpp"
-#include <iostream>
-#include <vector>
 #include <functional>
+#include <iostream>
+#include <ostream>
+#include <vector>
+
+#include "ptclogs/driver/idriver.hpp"
+#include "ptclogs/driver/json_driver.hpp"
 namespace logger {
-template <class Driver, LogLevel log_level>
-class ProductionLogger {
+template <class Driver = JSONDriver, LogLevel log_level = LogLevel::INFO,
+          std::ostream& out = std::cout>
+class ProductionLogger {};
+template <typename Driver, std::ostream& out>
+class ProductionLogger<Driver, LogLevel::INFO, out> {
  public:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out) {
+  ProductionLogger(Field<ExtraArgs>... extra) : driver(out) {
     extraArgs = [this, extra...]() { printv(extra...); };
     extraFunctions.push_back(extraArgs);
   }
 
   template <typename... ExtraArgs>
-  ProductionLogger<Driver, log_level> With(Field<ExtraArgs>... extra) {
-    return ProductionLogger<Driver, log_level>(out, extraFunctions, extra...);
-  }
-
- private:
-  template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out,
-                   std::vector<std::function<void()>> _extraFunctions,
-                   Field<ExtraArgs>... extra)
-      : ProductionLogger(out, extra...) {
-    for (auto f : _extraFunctions) {
-      extraFunctions.push_back(f);
-    }
-  }
-
-  Driver driver;
-  void printv() {}
-  template <typename T>
-  void printv(Field<T> field) {
-    driver.print_field(field.header, field.value);
-  }
-
-  template <typename T, typename... Args>
-  void printv(Field<T> field,
-              Field<Args>... args)  // recursive variadic function
-  {
-    driver.print_field(field.header, field.value);
-    driver.field_separator();
-    printv(args...);
-  }
-
-  std::vector<std::function<void()>> extraFunctions;
-
-  template <typename T>
-  void print_object(T object, LogLevel level) {
-    driver.begin_message();
-    driver.print_timestamp();
-    driver.separator();
-    driver.print_level(level);
-    driver.separator();
-    for (auto& f : extraFunctions) {
-      f();
-      driver.field_separator();
-    }
-    driver.print_object(object);
-    driver.end_message();
-    out << std::endl;
-  }
-
-  template <typename... Args>
-  void print_message(std::string message, LogLevel level, Field<Args>... args) {
-    driver.begin_message();
-    driver.print_timestamp();
-    driver.separator();
-    driver.print_level(level);
-    driver.separator();
-    driver.print_message(message);
-    driver.separator();
-    for (auto& f : extraFunctions) {
-      f();
-      driver.field_separator();
-    }
-    printv(args...);
-    driver.end_message();
-    out << std::endl;
-  }
-
-  std::ostream& out;
-
-  std::function<void()> extraArgs;
-};
-template <typename Driver>
-class ProductionLogger<Driver, LogLevel::INFO> {
- public:
-  template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out) {
-    extraArgs = [this, extra...]() { printv(extra...); };
-    extraFunctions.push_back(extraArgs);
-  }
-
-  template <typename... ExtraArgs>
-  ProductionLogger<Driver, LogLevel::INFO> With(Field<ExtraArgs>... extra) {
-    return ProductionLogger<Driver, LogLevel::INFO>(out, extraFunctions,
-                                                    extra...);
+  ProductionLogger<Driver, LogLevel::INFO, out> With(Field<ExtraArgs>... extra) {
+    return ProductionLogger<Driver, LogLevel::INFO, out>(extraFunctions, extra...);
   }
 
   /**
@@ -218,10 +140,10 @@ class ProductionLogger<Driver, LogLevel::INFO> {
 
  private:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out,
+  ProductionLogger(
                    std::vector<std::function<void()>> _extraFunctions,
                    Field<ExtraArgs>... extra)
-      : ProductionLogger(out, extra...) {
+      : ProductionLogger(extra...) {
     for (auto f : _extraFunctions) {
       extraFunctions.push_back(f);
     }
@@ -279,24 +201,22 @@ class ProductionLogger<Driver, LogLevel::INFO> {
     out << std::endl;
   }
 
-  std::ostream& out;
-
   std::function<void()> extraArgs;
 };
-template <typename Driver>
-class ProductionLogger<Driver, LogLevel::DEBUG> {
+template <typename Driver, std::ostream& out>
+class ProductionLogger<Driver, LogLevel::DEBUG, out> {
  public:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out) {
+  ProductionLogger(Field<ExtraArgs>... extra) : driver(out) {
     extraArgs = [this, extra...]() { printv(extra...); };
     extraFunctions.push_back(extraArgs);
   }
 
   template <typename... ExtraArgs>
-  ProductionLogger<Driver, LogLevel::DEBUG> With(Field<ExtraArgs>... extra) {
-    return ProductionLogger<Driver, LogLevel::DEBUG>(out, extraFunctions,
-                                                    extra...);
+  ProductionLogger<Driver, LogLevel::DEBUG, out> With(
+      Field<ExtraArgs>... extra) {
+    return ProductionLogger<Driver, LogLevel::DEBUG, out>(extraFunctions,
+                                                          extra...);
   }
   /**
    * @brief Logs the object t at WARN log level.
@@ -418,10 +338,9 @@ class ProductionLogger<Driver, LogLevel::DEBUG> {
 
  private:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out,
-                   std::vector<std::function<void()>> _extraFunctions,
+  ProductionLogger(std::vector<std::function<void()>> _extraFunctions,
                    Field<ExtraArgs>... extra)
-      : ProductionLogger(out, extra...) {
+      : ProductionLogger(extra...) {
     for (auto f : _extraFunctions) {
       extraFunctions.push_back(f);
     }
@@ -479,24 +398,22 @@ class ProductionLogger<Driver, LogLevel::DEBUG> {
     out << std::endl;
   }
 
-  std::ostream& out;
-
   std::function<void()> extraArgs;
 };
-template <typename Driver>
-class ProductionLogger<Driver, LogLevel::ERROR> {
+template <typename Driver, std::ostream& out>
+class ProductionLogger<Driver, LogLevel::ERROR, out> {
  public:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out) {
+  ProductionLogger(Field<ExtraArgs>... extra)
+      : driver(out) {
     extraArgs = [this, extra...]() { printv(extra...); };
     extraFunctions.push_back(extraArgs);
   }
 
   template <typename... ExtraArgs>
-  ProductionLogger<Driver, LogLevel::ERROR> With(Field<ExtraArgs>... extra) {
-    return ProductionLogger<Driver, LogLevel::ERROR>(out, extraFunctions,
-                                                    extra...);
+  ProductionLogger<Driver, LogLevel::ERROR, out> With(Field<ExtraArgs>... extra) {
+    return ProductionLogger<Driver, LogLevel::ERROR, out>( extraFunctions,
+                                                     extra...);
   }
   /**
    * @brief Logs the object t at WARN log level.
@@ -606,10 +523,10 @@ class ProductionLogger<Driver, LogLevel::ERROR> {
 
  private:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out,
+  ProductionLogger(
                    std::vector<std::function<void()>> _extraFunctions,
                    Field<ExtraArgs>... extra)
-      : ProductionLogger(out, extra...) {
+      : ProductionLogger( extra...) {
     for (auto f : _extraFunctions) {
       extraFunctions.push_back(f);
     }
@@ -667,24 +584,23 @@ class ProductionLogger<Driver, LogLevel::ERROR> {
     out << std::endl;
   }
 
-  std::ostream& out;
 
   std::function<void()> extraArgs;
 };
-template <typename Driver>
-class ProductionLogger<Driver, LogLevel::FATAL> {
+template <typename Driver, std::ostream& out>
+class ProductionLogger<Driver, LogLevel::FATAL, out> {
  public:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out) {
+  ProductionLogger(Field<ExtraArgs>... extra)
+      :  driver(out) {
     extraArgs = [this, extra...]() { printv(extra...); };
     extraFunctions.push_back(extraArgs);
   }
 
   template <typename... ExtraArgs>
-  ProductionLogger<Driver, LogLevel::FATAL> With(Field<ExtraArgs>... extra) {
-    return ProductionLogger<Driver, LogLevel::FATAL>(out, extraFunctions,
-                                                    extra...);
+  ProductionLogger<Driver, LogLevel::FATAL, out> With(Field<ExtraArgs>... extra) {
+    return ProductionLogger<Driver, LogLevel::FATAL, out>( extraFunctions,
+                                                     extra...);
   }
   /**
    * @brief Logs the object t at WARN log level.
@@ -790,10 +706,10 @@ class ProductionLogger<Driver, LogLevel::FATAL> {
 
  private:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out,
+  ProductionLogger(
                    std::vector<std::function<void()>> _extraFunctions,
                    Field<ExtraArgs>... extra)
-      : ProductionLogger(out, extra...) {
+      : ProductionLogger( extra...) {
     for (auto f : _extraFunctions) {
       extraFunctions.push_back(f);
     }
@@ -851,23 +767,22 @@ class ProductionLogger<Driver, LogLevel::FATAL> {
     out << std::endl;
   }
 
-  std::ostream& out;
 
   std::function<void()> extraArgs;
 };
-template <typename Driver>
-class ProductionLogger<Driver, LogLevel::WARN> {
+template <typename Driver, std::ostream& out>
+class ProductionLogger<Driver, LogLevel::WARN, out> {
  public:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
-      : out(out), driver(out) {
+  ProductionLogger( Field<ExtraArgs>... extra)
+      : driver(out) {
     extraArgs = [this, extra...]() { printv(extra...); };
     extraFunctions.push_back(extraArgs);
   }
 
   template <typename... ExtraArgs>
-  ProductionLogger<Driver, LogLevel::WARN> With(Field<ExtraArgs>... extra) {
-    return ProductionLogger<Driver, LogLevel::WARN>(out, extraFunctions,
+  ProductionLogger<Driver, LogLevel::WARN, out> With(Field<ExtraArgs>... extra) {
+    return ProductionLogger<Driver, LogLevel::WARN, out>( extraFunctions,
                                                     extra...);
   }
   /**
@@ -982,10 +897,10 @@ class ProductionLogger<Driver, LogLevel::WARN> {
 
  private:
   template <typename... ExtraArgs>
-  ProductionLogger(std::ostream& out,
+  ProductionLogger(
                    std::vector<std::function<void()>> _extraFunctions,
                    Field<ExtraArgs>... extra)
-      : ProductionLogger(out, extra...) {
+      : ProductionLogger( extra...) {
     for (auto f : _extraFunctions) {
       extraFunctions.push_back(f);
     }
@@ -1043,9 +958,8 @@ class ProductionLogger<Driver, LogLevel::WARN> {
     out << std::endl;
   }
 
-  std::ostream& out;
 
   std::function<void()> extraArgs;
 };
-}; // namespace logger
+};  // namespace logger
 #endif
