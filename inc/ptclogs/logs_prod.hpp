@@ -563,7 +563,7 @@ class ProductionLogger<Driver, LogLevel::ERROR> {
    */
   template <typename... Args>
   void ERROR(std::string message, Field<Args>... args) {
-    prin_message(message, LogLevel::ERROR, args...);
+    print_message(message, LogLevel::ERROR, args...);
   }
 
   /**
