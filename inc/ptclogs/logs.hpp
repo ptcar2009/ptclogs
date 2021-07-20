@@ -1,10 +1,13 @@
 #ifndef LOGS_HPP
 #define LOGS_HPP
 
+#include <functional>
 #include <iostream>
 #include <ostream>
 #include <string>
+#include <vector>
 
+#include "ptclogs/driver/console_driver.hpp"
 #include "ptclogs/driver/idriver.hpp"
 
 namespace logger {
@@ -156,30 +159,44 @@ class Logger {
    */
   LogLevel GetLogLevel() { return log_level; };
 
-  /**
-   * @brief Instantiates a logger with the log level from the VERBOSITY env var.
-   *
-   *
-   * @param out Output stream for the logger.
-   */
-  Logger(std::ostream& out = std::cout) : out(out), driver(out) {
+  template <typename... ExtraArgs>
+  Logger(std::ostream& out = std::cout, Field<ExtraArgs>... extra)
+      : out(out), driver(out), extraFunctions() {
     log_level = LogLevel::INFO;
     if (getenv("VERBOSITY") != NULL)
       log_level = LogLevel(atoi(getenv("VERBOSITY")));
-  };
 
-  /**
-   * @brief Instantiates a logger with the given log level that writes on `out`.
-   *
-   * @param log_level Log level of the logger.
-   * @param out Output stream on which the logger will write to.
-   */
-  Logger(LogLevel log_level, std::ostream& out = std::cout)
-      : log_level(log_level), driver(out), out(out){};
+    extraArgs = [this, extra...]() { printv(extra...); };
+    extraFunctions.push_back(extraArgs);
+  }
+
+  template <typename... ExtraArgs>
+  Logger(LogLevel log_level, std::ostream& out = std::cout,
+         Field<ExtraArgs>... extra)
+      : log_level(log_level), out(out), driver(out) {
+    extraArgs = [this, extra...]() { printv(extra...); };
+    extraFunctions.push_back(extraArgs);
+  }
+
+  template <typename... ExtraArgs>
+  Logger<Driver> With(Field<ExtraArgs>... extra) {
+    return Logger<Driver>(log_level, out, extraFunctions, extra...);
+  }
 
  private:
+  template <typename... ExtraArgs>
+  Logger(LogLevel log_level, std::ostream& out,
+         std::vector<std::function<void()>> _extraFunctions,
+         Field<ExtraArgs>... extra)
+      : Logger(log_level, out, extra...) {
+    for (auto f : _extraFunctions) {
+      extraFunctions.push_back(f);
+    }
+  }
+
   Driver driver;
   LogLevel log_level;
+  void printv() {}
   template <typename T>
   void printv(Field<T> field) {
     driver.print_field(field.header, field.value);
@@ -191,9 +208,10 @@ class Logger {
   {
     driver.print_field(field.header, field.value);
     driver.field_separator();
-
     printv(args...);
   }
+
+  std::vector<std::function<void()>> extraFunctions;
 
   template <typename T>
   void print_object(T object, LogLevel level) {
@@ -202,6 +220,10 @@ class Logger {
     driver.separator();
     driver.print_level(level);
     driver.separator();
+    for (auto& f : extraFunctions) {
+      f();
+      driver.field_separator();
+    }
     driver.print_object(object);
     driver.end_message();
     out << std::endl;
@@ -216,12 +238,18 @@ class Logger {
     driver.separator();
     driver.print_message(message);
     driver.separator();
+    for (auto& f : extraFunctions) {
+      f();
+      driver.field_separator();
+    }
     printv(args...);
     driver.end_message();
     out << std::endl;
   }
 
   std::ostream& out;
+
+  std::function<void()> extraArgs;
 };
 
 };  // namespace logger
